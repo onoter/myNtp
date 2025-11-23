@@ -1,12 +1,10 @@
-const CACHE_NAME = 'myinfinity-cache-v2';
-// 定义需要缓存的文件
+const CACHE_NAME = 'myinfinity-offline-v3';
+// 只缓存本地核心文件，不依赖任何外部 CDN
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/lucide@latest'
+  './icon.svg'
 ];
 
 self.addEventListener('install', event => {
@@ -33,10 +31,16 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // 拦截网络请求，优先使用缓存
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        // 如果缓存里有，直接返回缓存
+        if (response) {
+          return response;
+        }
+        // 如果缓存没有，才去联网
+        return fetch(event.request);
       })
   );
 });
