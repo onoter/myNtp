@@ -2,19 +2,16 @@
   "name": "MyInfinity",
   "short_name": "Infinity",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://www.google.com/s2/favicons?domain=github.com&sz=128",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "https://www.google.com/s2/favicons?domain=github.com&sz=512",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

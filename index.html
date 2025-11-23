@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MyInfinity</title>
+    <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="https://www.google.com/s2/favicons?domain=github.com&sz=64">
+    <!-- Local Icon -->
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
     
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -129,7 +132,7 @@
                     <i data-lucide="upload" class="w-4 h-4"></i> 导入备份
                     <input type="file" accept=".json" onchange="importData(this)" class="hidden">
                 </label>
-                <p class="text-center text-xs text-slate-600 pt-4">v1.3 Lite • 无需服务器</p>
+                <p class="text-center text-xs text-slate-600 pt-4">v1.5 PWA • 离线可用</p>
             </div>
         </div>
     </div>
@@ -154,13 +157,12 @@
             }
             renderBookmarks();
             
-            // 注册 Service Worker (仅在非预览环境下有效，预览环境报错请忽略)
+            // 注册 Service Worker
             if ('serviceWorker' in navigator) {
-                // 延迟注册，避免影响首屏加载
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('sw.js')
-                        .then(reg => console.log('SW Registered'))
-                        .catch(err => console.log('SW Fail (Normal in preview):', err));
+                        .then(reg => console.log('SW Registered', reg))
+                        .catch(err => console.log('SW Fail:', err));
                 });
             }
         });
