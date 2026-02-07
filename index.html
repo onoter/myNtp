@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -161,18 +162,16 @@
         
         .btn-action { background: #334155; color: white; padding: 10px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; width: 100%; cursor: pointer; }
 
+        /* 版本信息样式 */
+        .version-info {
+            text-align: center;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .version-text { font-size: 10px; color: #475569; display: block; line-height: 1.5; }
+
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
 
@@ -225,7 +224,7 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <div class="modal-header">
-                <span style="font-weight:600">数据备份</span>
+                <span style="font-weight:600">设置 & 备份</span>
                 <button class="icon-btn" onclick="closeModal('settingsModal')" style="padding:4px;" id="iconClose2"></button>
             </div>
             <div class="modal-body">
@@ -237,13 +236,17 @@
                     <span id="iconUpload"></span> 导入备份
                     <input type="file" accept=".json" onchange="importData(this)" style="display:none">
                 </label>
-                <p style="text-align:center; font-size:10px; color:#475569; margin-top:10px">v2.0 Offline Ready</p>
+                
+                <!-- 版本和更新时间 -->
+                <div class="version-info">
+                    <span class="version-text">当前版本: v2.1.2</span>
+                    <span class="version-text">最后更新: 2024-05-21 16:30</span>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. SVG 图标定义 (内联，无需网络) ---
         const ICONS = {
             settings: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
             search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
@@ -254,7 +257,6 @@
             upload: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
         };
 
-        // 初始化静态图标
         document.getElementById('btnSettings').innerHTML = ICONS.settings;
         document.getElementById('iconSearch').innerHTML = ICONS.search;
         document.getElementById('iconClose1').innerHTML = ICONS.x;
@@ -262,7 +264,6 @@
         document.getElementById('iconDownload').innerHTML = ICONS.download;
         document.getElementById('iconUpload').innerHTML = ICONS.upload;
 
-        // --- 2. 核心逻辑 ---
         const DEFAULT_BOOKMARKS = [
             { id: '1', title: 'Google', url: 'https://google.com', color: '#4285F4' },
             { id: '2', title: 'GitHub', url: 'https://github.com', color: '#ffffff' },
@@ -280,11 +281,10 @@
             }
             renderBookmarks();
 
-            // PWA Service Worker
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('SW Ready'))
-                    .catch(err => console.log('SW Error', err));
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW 注册成功，作用域:', reg.scope))
+                    .catch(err => console.log('SW 注册失败:', err));
             }
         });
 
@@ -301,7 +301,6 @@
             let html = '';
             filtered.forEach(b => {
                 const domain = new URL(b.url).hostname;
-                // 使用 Google Favicon 服务，但也支持失败回退
                 const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
                 
                 html += `
@@ -318,7 +317,6 @@
                 </div>`;
             });
 
-            // 添加按钮
             html += `
             <div class="bookmark-item" onclick="openAdd()">
                 <div class="card add-card">
@@ -330,13 +328,8 @@
             container.innerHTML = html;
         }
 
-        // --- 3. 弹窗控制 ---
-        function openModal(id) { 
-            document.getElementById(id).classList.add('active'); 
-        }
-        function closeModal(id) { 
-            document.getElementById(id).classList.remove('active'); 
-        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function openAdd() {
             document.getElementById('editId').value = '';
@@ -416,6 +409,5 @@
             reader.readAsText(file);
         }
     </script>
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
