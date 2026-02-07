@@ -1,16 +1,17 @@
-const CACHE_NAME = 'myinfinity-offline-v3';
-// 只缓存本地核心文件，不依赖任何外部 CDN
+const CACHE_NAME = 'myinfinity-offline-v4';
+
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg'
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon.svg'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
   );
   self.skipWaiting();
 });
@@ -19,9 +20,9 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        cacheNames.map(name => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
           }
         })
       );
@@ -31,16 +32,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // 拦截网络请求，优先使用缓存
+  // ⭐ 关键修复点：处理页面导航请求
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('/index.html')
+    );
+    return;
+  }
+
+  // 其他资源：cache first
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // 如果缓存里有，直接返回缓存
-        if (response) {
-          return response;
-        }
-        // 如果缓存没有，才去联网
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
